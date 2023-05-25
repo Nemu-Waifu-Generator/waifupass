@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 */
 abstract contract BatchReveal {
     uint constant public TOKEN_LIMIT = 1000;
-    uint constant public REVEAL_BATCH_SIZE = 10;
+    uint constant public REVEAL_BATCH_SIZE = 100;
     mapping(uint => uint) public batchToSeed;
 
     struct Range{
