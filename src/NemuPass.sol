@@ -12,7 +12,6 @@ import "./forks/MultiSigOwnable.sol";
 */
 
 contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
-    uint256 public immutable startSale;
     string public baseURI;
     string public unrevealedURI = "ipfs://";
     bool public useFancyMath = true;
@@ -21,18 +20,18 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     uint256 public currentMaxSupply;
 
     constructor(
-        uint256 _startSale,
         string memory _baseURI,
         uint256 _initialMaxSupply
     ) ERC721A("Nemu Pass", "NEMU") {
-        startSale = _startSale;
         baseURI = _baseURI;
         currentMaxSupply = _initialMaxSupply;
     }
 
     function mint(uint256 _amount) public payable {
-        require(block.timestamp >= startSale, "sale has not started");
-        require(totalSupply() + _amount <= currentMaxSupply, "minted over supply");
+        require(
+            totalSupply() + _amount <= currentMaxSupply,
+            "minted over supply"
+        );
         uint256 cost;
         unchecked {
             cost = _amount * 0.1 ether;
@@ -47,7 +46,10 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         bool newUseFancyMath,
         uint256 newCurrentMaxSupply
     ) external onlyRealOwner {
-        require(newCurrentMaxSupply >= currentMaxSupply && newCurrentMaxSupply <= TOKEN_LIMIT);
+        require(
+            newCurrentMaxSupply >= currentMaxSupply &&
+                newCurrentMaxSupply <= TOKEN_LIMIT
+        );
         baseURI = newBaseURI;
         unrevealedURI = newUnrevealedURI;
         useFancyMath = newUseFancyMath;

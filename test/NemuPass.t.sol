@@ -15,7 +15,7 @@ contract NemuPassTest is Test {
 
     function setUp() external {
         vm.prank(deployer);
-        nemuPass = new NemuPass(100, "ipfs://bafybeibqnap32w3k6umeyy46hnnyg6rat3vfwttl3ainrqo7eyfymkx42a/", 1000);
+        nemuPass = new NemuPass(100, "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/", 1000);
         hoax(alice, 100 ether);
     }
 
