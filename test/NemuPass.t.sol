@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/NemuPass.sol";
@@ -15,7 +15,10 @@ contract NemuPassTest is Test {
 
     function setUp() external {
         vm.prank(deployer);
-        nemuPass = new NemuPass(100, "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/", 1000);
+        nemuPass = new NemuPass(
+            "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/",
+            100
+        );
         hoax(alice, 100 ether);
     }
 

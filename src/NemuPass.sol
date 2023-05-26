@@ -43,21 +43,23 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     function setParams(
         string memory newBaseURI,
         string memory newUnrevealedURI,
-        bool newUseFancyMath,
-        uint256 newCurrentMaxSupply
+        bool newUseFancyMath
     ) external onlyRealOwner {
-        require(
-            newCurrentMaxSupply >= currentMaxSupply &&
-                newCurrentMaxSupply <= TOKEN_LIMIT
-        );
         baseURI = newBaseURI;
         unrevealedURI = newUnrevealedURI;
         useFancyMath = newUseFancyMath;
-        currentMaxSupply = newCurrentMaxSupply;
     }
 
     function retrieveFunds(address payable to) external onlyRealOwner {
         to.transfer(address(this).balance);
+    }
+
+    function increaseMaxSupply(uint256 _newCurrentMaxSupply) external onlyRealOwner {
+        require(
+            _newCurrentMaxSupply >= currentMaxSupply &&
+                _newCurrentMaxSupply <= TOKEN_LIMIT
+        );
+        currentMaxSupply = _newCurrentMaxSupply;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
