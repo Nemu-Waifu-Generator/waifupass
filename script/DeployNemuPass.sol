@@ -11,7 +11,10 @@ contract DeployNemuPassScript is Script {
         vm.startBroadcast(privateKey);
         NemuPass nemupass = new NemuPass(
             "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/",
-            100
+            "ipfs://",
+            true,
+            5,
+            block.timestamp + 86400
         );
         vm.stopBroadcast();
     }

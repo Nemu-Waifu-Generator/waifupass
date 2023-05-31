@@ -13,53 +13,61 @@ import "./forks/MultiSigOwnable.sol";
 
 contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     string public baseURI;
-    string public unrevealedURI = "ipfs://";
-    bool public useFancyMath = true;
-    uint256 public lastTokenRevealed = 0;
+    string public unrevealedURI;
+    bool public useFancyMath;
+    uint256 public lastTokenRevealed;
     uint256 public lastBlockForRandom;
-    uint256 public currentMaxSupply;
+    uint256 public maxMint;
+    uint256 public startSale;
+
+    mapping(address => uint256) public amtMintedByAddress;
 
     constructor(
         string memory _baseURI,
-        uint256 _initialMaxSupply
+        string memory _unrevealedURI,
+        bool _useFancyMath,
+        uint256 _maxMint,
+        uint256 _startSale
     ) ERC721A("Nemu Pass", "NEMU") {
         baseURI = _baseURI;
-        currentMaxSupply = _initialMaxSupply;
+        unrevealedURI = _unrevealedURI;
+        useFancyMath = _useFancyMath;
+        maxMint = _maxMint;
+        startSale = _startSale;
     }
 
     function mint(uint256 _amount) public payable {
+        require(block.timestamp >= startSale, "sale hasn't started");
+        require(totalSupply() + _amount <= TOKEN_LIMIT, "minted over supply");
         require(
-            totalSupply() + _amount <= currentMaxSupply,
-            "minted over supply"
+            amtMintedByAddress[msg.sender] + _amount <= maxMint,
+            "can't mint more than allowed"
         );
         uint256 cost;
         unchecked {
             cost = _amount * 0.1 ether;
         }
         require(msg.value == cost, "wrong payment");
+        unchecked {
+            amtMintedByAddress[msg.sender] += _amount;
+        }
         _mint(msg.sender, _amount);
     }
 
     function setParams(
-        string memory newBaseURI,
-        string memory newUnrevealedURI,
-        bool newUseFancyMath
+        string memory _baseURI,
+        string memory _unrevealedURI,
+        bool _useFancyMath,
+        uint256 _maxMint
     ) external onlyRealOwner {
-        baseURI = newBaseURI;
-        unrevealedURI = newUnrevealedURI;
-        useFancyMath = newUseFancyMath;
+        baseURI = _baseURI;
+        unrevealedURI = _unrevealedURI;
+        useFancyMath = _useFancyMath;
+        maxMint = _maxMint;
     }
 
-    function retrieveFunds(address payable to) external onlyRealOwner {
-        to.transfer(address(this).balance);
-    }
-
-    function increaseMaxSupply(uint256 _newCurrentMaxSupply) external onlyRealOwner {
-        require(
-            _newCurrentMaxSupply >= currentMaxSupply &&
-                _newCurrentMaxSupply <= TOKEN_LIMIT
-        );
-        currentMaxSupply = _newCurrentMaxSupply;
+    function retrieveFunds(address payable _to) external onlyRealOwner {
+        _to.transfer(address(this).balance);
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {

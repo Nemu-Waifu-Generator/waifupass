@@ -17,6 +17,9 @@ contract NemuPassTest is Test {
         vm.prank(deployer);
         nemuPass = new NemuPass(
             "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/",
+            "ipfs://",
+            true,
+            1000,
             100
         );
         hoax(alice, 100 ether);
@@ -29,25 +32,30 @@ contract NemuPassTest is Test {
     }
 
     mapping(string => uint256) public randoTest;
+
     function testRandomization() external {
         vm.warp(100);
         vm.prank(alice);
         nemuPass.mint{value: 100 ether}(1000);
         vm.startPrank(deployer);
         uint256 startBlock = 5000;
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i = 0; i < 20; i++) {
             nemuPass.requestBlock();
             startBlock += 5;
             nemuPass.revealBatch();
             startBlock += 50;
         }
         vm.stopPrank();
+        uint256 checked;
         for (uint256 i = 0; i < 1000; i++) {
             string memory result = nemuPass.tokenURI(i);
-            require(randoTest[result] == 0, "conflicting URI");
+            assertEq(randoTest[result], 0);
             randoTest[result] = i;
+            checked++;
             console.log(result);
         }
+        assertEq(checked, 1000);
+        console.log(checked);
     }
 
     function testCannotMintMoreThanSupply() external {
