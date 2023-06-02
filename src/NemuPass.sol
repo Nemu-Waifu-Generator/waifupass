@@ -17,7 +17,6 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     string public unrevealedURI = "ipfs://";
     bool public useFancyMath = true;
     uint256 public lastTokenRevealed;
-    uint256 public lastBlockForRandom;
     uint256 public startSale;
 
     mapping(address => uint256) public amtMintedByAddress;
@@ -30,7 +29,7 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         require(block.timestamp >= startSale, "sale hasn't started");
         require(totalSupply() + _amount <= TOKEN_LIMIT, "minted over supply");
         require(
-            amtMintedByAddress[msg.sender] + _amount <= 5,
+            amtMintedByAddress[msg.sender] + _amount <= 10,
             "can't mint more than allowed"
         );
         uint256 cost;
@@ -53,7 +52,8 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     }
 
     function retrieveFunds(address payable _to) external onlyRealOwner {
-        _to.transfer(address(this).balance);
+        (bool sent, ) = _to.call{value: address(this).balance}("");
+        require(sent, "Failed to send Ether");
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
@@ -80,14 +80,6 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         BLOCKCHAINS ARE DETERMINISTIC
         YOU SHOULD USE CHAINLINK VRF IF YOU ACTUALLY NEED IT
     */
-    function requestBlock() external onlyRealOwner {
-        require(
-            totalSupply() >= (lastTokenRevealed + REVEAL_BATCH_SIZE),
-            "totalSupply too low"
-        );
-        lastBlockForRandom = block.number;
-    }
-
     function revealBatch() external onlyRealOwner {
         require(
             totalSupply() >= (lastTokenRevealed + REVEAL_BATCH_SIZE),
@@ -95,11 +87,7 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         );
         uint256 batchNumber = lastTokenRevealed / REVEAL_BATCH_SIZE;
         bytes32 seed = keccak256(
-            abi.encodePacked(
-                block.number - lastBlockForRandom,
-                block.prevrandao,
-                block.timestamp
-            )
+            abi.encodePacked(blockhash(block.number), block.prevrandao)
         );
         batchToSeed[batchNumber] =
             uint256(seed) %

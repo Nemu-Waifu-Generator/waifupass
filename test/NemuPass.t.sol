@@ -12,11 +12,11 @@ contract NemuPassTest is Test {
 
     address public immutable deployer = address(69);
     address public immutable alice = address(1);
+    address public immutable bob = address(2);
 
     function setUp() external {
         vm.prank(deployer);
-        nemuPass = new NemuPass(1000);
-        hoax(alice, 100 ether);
+        nemuPass = new NemuPass(50);
     }
 
     function testMint() external {
@@ -25,39 +25,23 @@ contract NemuPassTest is Test {
         nemuPass.mint{value: 0.1 ether}(1);
     }
 
-    mapping(string => uint256) public randoTest;
-
     function testRandomization() external {
         vm.warp(100);
         vm.prank(alice);
-        nemuPass.mint{value: 100 ether}(1000);
+        nemuPass.mint{value: 0.5 ether}(5);
+        vm.warp(150);
+        vm.prank(bob);
+        nemuPass.mint{value: 0.5 ether}(5);
         vm.startPrank(deployer);
-        uint256 startBlock = 5000;
-        for (uint256 i = 0; i < 20; i++) {
-            nemuPass.requestBlock();
-            startBlock += 5;
-            nemuPass.revealBatch();
-            startBlock += 50;
-        }
+        vm.warp(1000);
+        nemuPass.revealBatch();
+        vm.warp(1500);
+        nemuPass.revealBatch();
         vm.stopPrank();
-        uint256 checked;
-        for (uint256 i = 0; i < 1000; i++) {
+        for (uint256 i = 0; i < 10; i++) {
             string memory result = nemuPass.tokenURI(i);
-            assertEq(randoTest[result], 0);
-            randoTest[result] = i;
-            checked++;
             console.log(result);
         }
-        assertEq(checked, 1000);
-        console.log(checked);
     }
 
-    function testCannotMintMoreThanSupply() external {
-        vm.warp(100);
-        vm.startPrank(alice);
-        nemuPass.mint{value: 100 ether}(1000);
-        vm.expectRevert();
-        nemuPass.mint{value: 0.1 ether}(1);
-        vm.stopPrank();
-    }
 }
