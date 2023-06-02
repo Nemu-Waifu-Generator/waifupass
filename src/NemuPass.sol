@@ -12,27 +12,17 @@ import "./forks/MultiSigOwnable.sol";
 */
 
 contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
-    string public baseURI;
-    string public unrevealedURI;
-    bool public useFancyMath;
+    string public baseURI =
+        "ipfs://bafybeierhfoa46rq5b33sya66d2eelhfbyf4hbtqh75kjgki2isrcks7fi/";
+    string public unrevealedURI = "ipfs://";
+    bool public useFancyMath = true;
     uint256 public lastTokenRevealed;
     uint256 public lastBlockForRandom;
-    uint256 public maxMint;
     uint256 public startSale;
 
     mapping(address => uint256) public amtMintedByAddress;
 
-    constructor(
-        string memory _baseURI,
-        string memory _unrevealedURI,
-        bool _useFancyMath,
-        uint256 _maxMint,
-        uint256 _startSale
-    ) ERC721A("Nemu Pass", "NEMU") {
-        baseURI = _baseURI;
-        unrevealedURI = _unrevealedURI;
-        useFancyMath = _useFancyMath;
-        maxMint = _maxMint;
+    constructor(uint256 _startSale) ERC721A("Nemu Pass", "NEMU") {
         startSale = _startSale;
     }
 
@@ -40,7 +30,7 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         require(block.timestamp >= startSale, "sale hasn't started");
         require(totalSupply() + _amount <= TOKEN_LIMIT, "minted over supply");
         require(
-            amtMintedByAddress[msg.sender] + _amount <= maxMint,
+            amtMintedByAddress[msg.sender] + _amount <= 5,
             "can't mint more than allowed"
         );
         uint256 cost;
@@ -56,14 +46,10 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
 
     function setParams(
         string memory _baseURI,
-        string memory _unrevealedURI,
-        bool _useFancyMath,
-        uint256 _maxMint
+        bool _useFancyMath
     ) external onlyRealOwner {
         baseURI = _baseURI;
-        unrevealedURI = _unrevealedURI;
         useFancyMath = _useFancyMath;
-        maxMint = _maxMint;
     }
 
     function retrieveFunds(address payable _to) external onlyRealOwner {
