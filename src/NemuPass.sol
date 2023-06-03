@@ -18,7 +18,6 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     bool public useFancyMath = true;
     uint256 public lastTokenRevealed;
     uint256 public startSale;
-    uint256 public price = 0.1 ether;
     bool public paused = false;
     bool public paramsLocked = false;
 
@@ -38,7 +37,7 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         require(!paused, "sale paused");
         uint256 cost;
         unchecked {
-            cost = _amount * price;
+            cost = _amount * 0.1 ether;
         }
         require(msg.value == cost, "wrong payment");
         unchecked {
@@ -51,14 +50,12 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
         string memory _baseURI,
         string memory _unrevealedURI,
         bool _useFancyMath,
-        uint256 _price,
         bool _paused
     ) external onlyRealOwner {
         require(!paramsLocked, "params locked");
         baseURI = _baseURI;
         unrevealedURI = _unrevealedURI;
         useFancyMath = _useFancyMath;
-        price = _price;
         paused = _paused;
     }
 
