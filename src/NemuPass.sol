@@ -18,6 +18,9 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
     bool public useFancyMath = true;
     uint256 public lastTokenRevealed;
     uint256 public startSale;
+    uint256 public price = 0.1 ether;
+    bool public paused = false;
+    bool public paramsLocked = false;
 
     mapping(address => uint256) public amtMintedByAddress;
 
@@ -32,9 +35,10 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
             amtMintedByAddress[msg.sender] + _amount <= 10,
             "can't mint more than allowed"
         );
+        require(!paused, "sale paused");
         uint256 cost;
         unchecked {
-            cost = _amount * 0.1 ether;
+            cost = _amount * price;
         }
         require(msg.value == cost, "wrong payment");
         unchecked {
@@ -45,10 +49,21 @@ contract NemuPass is ERC721A, MultisigOwnable, BatchReveal {
 
     function setParams(
         string memory _baseURI,
-        bool _useFancyMath
+        string memory _unrevealedURI,
+        bool _useFancyMath,
+        uint256 _price,
+        bool _paused
     ) external onlyRealOwner {
+        require(!paramsLocked, "params locked");
         baseURI = _baseURI;
+        unrevealedURI = _unrevealedURI;
         useFancyMath = _useFancyMath;
+        price = _price;
+        paused = _paused;
+    }
+
+    function lockParams() external onlyRealOwner {
+        paramsLocked = true;
     }
 
     function retrieveFunds(address payable _to) external onlyRealOwner {
